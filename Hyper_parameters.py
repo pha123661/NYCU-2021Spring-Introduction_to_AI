@@ -1,5 +1,5 @@
 
-class HParams():
+class Hyper_parameters():
     def __init__(self):
         self.dataset_path = "./dataset/gtzan"
         self.feature_path = "./dataset/feature_augment"
@@ -25,4 +25,4 @@ class HParams():
         self.patience = 5
 
 
-Hparams = HParams()
+HyperParams = Hyper_parameters()
