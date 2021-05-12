@@ -4,6 +4,7 @@ import myDataLoader
 import numpy as np
 import torch
 import torch.nn as nn
+import pickle
 
 torch.manual_seed(0)
 torch.backends.cudnn.deterministic = True
@@ -69,6 +70,9 @@ class Wrapper(nn.Module):
             weight_decay=HyperParams.weight_decay,
             nesterov=True
         )
+        # self.optimizer = torch.optim.Adam(
+        #     self.model.parameters(),
+        # )
         self.learning_rate = HyperParams.learning_rate
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
@@ -108,7 +112,24 @@ class Wrapper(nn.Module):
 
 if __name__ == "__main__":
     train_loader, valid_loader, test_loader = myDataLoader.myDataLoader()
-    Classifier = Wrapper()
+    try:
+        with open("model.pth", mode="rb") as f:
+            while True:
+                ans = input("Load previous model ? [y/N]")
+                if ans == "y":
+                    Classifier = pickle.load(f)
+                    print("Model restored")
+                    break
+                elif ans == "N" or ans == "":
+                    Classifier = Wrapper()
+                    print("New model created")
+                    break
+                else:
+                    pass
+    except:
+        print("No model found, creating new model")
+        Classifier = Wrapper()
+
     print("Start Training")
     acc_train_set, acc_valid_set, acc_test_set = [], [], []
     for epoch in range(HyperParams.num_epochs):
@@ -120,12 +141,17 @@ if __name__ == "__main__":
         acc_test_set.append(acc_test)
         print("Epoch %d: train acc: %.2f, valid acc: %.2f, test acc: %.2f" %
               (epoch, acc_train, acc_valid, acc_test))
+
+        with open("model.pth", mode="wb") as f:
+            pickle.dump(Classifier, f)
+        print("Model saved")
     print("Training finished!")
-    print("Test Accuracy: %.2f" % (acc_test * 100))
+    print("Test Accuracy: %.2f" % (acc_test))
 
     plt.plot(acc_train_set)
     plt.plot(acc_valid_set)
     plt.plot(acc_test_set)
+    plt.legend(labels=["train", "valid", "test"])
     plt.xlabel("Accuracy")
     plt.ylabel("epoch")
     plt.show()
