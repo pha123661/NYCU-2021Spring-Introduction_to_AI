@@ -70,10 +70,15 @@ class Wrapper(nn.Module):
             weight_decay=HyperParams.weight_decay,
             nesterov=True
         )
-        # self.optimizer = torch.optim.Adam(
-        #     self.model.parameters(),
-        # )
-        self.learning_rate = HyperParams.learning_rate
+
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            mode="min",
+            factor=HyperParams.factor,
+            patience=HyperParams.patience,
+            verbose=True
+        )
+        self.stopping_rate = HyperParams.stopping_rate
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
@@ -86,6 +91,10 @@ class Wrapper(nn.Module):
         correct_count = int((rst == ground_truth).sum().item())
 
         return correct_count/float(ground_truth.shape[0])*100
+
+    def early_stop(self, loss):
+        self.scheduler.step(loss)
+        return (self.optimizer.param_groups[0]["lr"] < self.stopping_rate)
 
     def run(self, dataloader, mode="train"):
         if mode == "train":
@@ -101,17 +110,19 @@ class Wrapper(nn.Module):
             rst = self.model(x)
             loss = self.loss_function(rst, y.long())
             acc = self.get_accuracy(rst, y.long())
+
             if mode == "train":
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
+
             epoch_loss += rst.shape[0]*float(loss)
             epoch_acc += rst.shape[0]*acc
+
         return epoch_loss/len(dataloader.dataset), epoch_acc/len(dataloader.dataset)
 
 
 if __name__ == "__main__":
-    train_loader, valid_loader, test_loader = myDataLoader.myDataLoader()
     try:
         with open("model.pth", mode="rb") as f:
             while True:
@@ -129,6 +140,7 @@ if __name__ == "__main__":
     except:
         print("No model found, creating new model")
         Classifier = Wrapper()
+    train_loader, valid_loader, test_loader = myDataLoader.myDataLoader()
 
     print("Start Training")
     acc_train_set, acc_valid_set, acc_test_set = [], [], []
@@ -136,15 +148,21 @@ if __name__ == "__main__":
         loss_train, acc_train = Classifier.run(train_loader, "train")
         loss_valid, acc_valid = Classifier.run(valid_loader, "valid")
         loss_test, acc_test = Classifier.run(test_loader, "test")
+
         acc_train_set.append(acc_train)
         acc_valid_set.append(acc_valid)
         acc_test_set.append(acc_test)
+
         print("Epoch %d: train acc: %.2f, valid acc: %.2f, test acc: %.2f" %
               (epoch, acc_train, acc_valid, acc_test))
 
         with open("model.pth", mode="wb") as f:
             pickle.dump(Classifier, f)
         print("Model saved")
+
+        if Classifier.early_stop(loss_valid):
+            break
+
     print("Training finished!")
     print("Test Accuracy: %.2f" % (acc_test))
 
