@@ -15,7 +15,7 @@ class Hyper_parameters():
         self.feature_length = 1024
 
         # Training Parameters
-        self.batch_size = 128
+        self.batch_size = 64
         self.num_epochs = 26
         self.learning_rate = 1e-2
         self.stopping_rate = 1e-5
