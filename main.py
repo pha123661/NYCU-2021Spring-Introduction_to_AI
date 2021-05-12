@@ -50,15 +50,16 @@ class CNN_Model(nn.Module):
         )
 
     def forward(self, x):
-        x = torch.unsqueeze(x, dim=-1)
+        x = torch.unsqueeze(x, dim=1)
         features = self.extractor(x)
-        features = torch.flatten(features)
+        features = features.reshape((features.shape[0], -1))
         ret = self.classifier(features)
         return ret
 
 
 class Wrapper(nn.Module):
     def __init__(self):
+        super().__init__()
         self.model = CNN_Model()
         self.loss_function = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.SGD(
@@ -80,7 +81,7 @@ class Wrapper(nn.Module):
         ground_truth = ground_truth.cpu().long()
         correct_count = int((rst == ground_truth).sum().item())
 
-        return correct_count/float(ground_truth.shape[0])
+        return correct_count/float(ground_truth.shape[0])*100
 
     def run(self, dataloader, mode="train"):
         if mode == "train":
@@ -94,15 +95,15 @@ class Wrapper(nn.Module):
             y = y.to(self.device)
 
             rst = self.model(x)
-            loss = self.loss_function(rst, y)
-            acc = self.get_accuracy(rst, y)
+            loss = self.loss_function(rst, y.long())
+            acc = self.get_accuracy(rst, y.long())
             if mode == "train":
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
             epoch_loss += rst.shape[0]*float(loss)
             epoch_acc += rst.shape[0]*acc
-        return epoch_loss/len(dataloader.dataest), epoch_acc/len(dataloader.dataset)
+        return epoch_loss/len(dataloader.dataset), epoch_acc/len(dataloader.dataset)
 
 
 if __name__ == "__main__":
@@ -111,11 +112,20 @@ if __name__ == "__main__":
     print("Start Training")
     acc_train_set, acc_valid_set, acc_test_set = [], [], []
     for epoch in range(HyperParams.num_epochs):
-        loss_train, acc_train = Wrapper.run(train_loader, "train")
-        loss_valid, acc_valid = Wrapper.run(valid_loader, "valid")
-        loss_test, acc_test = Wrapper.run(test_loader, "test")
+        loss_train, acc_train = Classifier.run(train_loader, "train")
+        loss_valid, acc_valid = Classifier.run(valid_loader, "valid")
+        loss_test, acc_test = Classifier.run(test_loader, "test")
         acc_train_set.append(acc_train)
         acc_valid_set.append(acc_valid)
         acc_test_set.append(acc_test)
+        print("Epoch %d: train acc: %.2f, valid acc: %.2f, test acc: %.2f" %
+              (epoch, acc_train, acc_valid, acc_test))
     print("Training finished!")
     print("Test Accuracy: %.2f" % (acc_test * 100))
+
+    plt.plot(acc_train_set)
+    plt.plot(acc_valid_set)
+    plt.plot(acc_test_set)
+    plt.xlabel("Accuracy")
+    plt.ylabel("epoch")
+    plt.show()
