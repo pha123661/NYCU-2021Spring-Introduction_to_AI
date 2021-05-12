@@ -41,7 +41,7 @@ def load_dataset(name):
     return np.stack(x), np.stack(y)
 
 
-def my_DataLoader():
+def myDataLoader():
     x_train, y_train = load_dataset("train")
     x_valid, y_valid = load_dataset("valid")
     x_test, y_test = load_dataset("test")
