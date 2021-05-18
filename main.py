@@ -144,7 +144,7 @@ if __name__ == "__main__":
 
     print("Start Training")
     acc_train_set, acc_valid_set, acc_test_set = [], [], []
-    for epoch in range(HyperParams.num_epochs):
+    for epoch in range(1, HyperParams.num_epochs+1):
         loss_train, acc_train = Classifier.run(train_loader, "train")
         loss_valid, acc_valid = Classifier.run(valid_loader, "valid")
         loss_test, acc_test = Classifier.run(test_loader, "test")
