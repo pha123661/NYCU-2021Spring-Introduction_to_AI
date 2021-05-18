@@ -170,6 +170,6 @@ if __name__ == "__main__":
     plt.plot(acc_valid_set)
     plt.plot(acc_test_set)
     plt.legend(labels=["train", "valid", "test"])
-    plt.xlabel("Accuracy")
-    plt.ylabel("epoch")
+    plt.xlabel("epoch")
+    plt.ylabel("Accuracy")
     plt.show()
