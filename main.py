@@ -71,14 +71,6 @@ class Wrapper(nn.Module):
             nesterov=True
         )
 
-        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer,
-            mode="min",
-            factor=HyperParams.factor,
-            patience=HyperParams.patience,
-            verbose=True
-        )
-        self.stopping_rate = HyperParams.stopping_rate
         self.device = torch.device(
             "cuda" if torch.cuda.is_available() else "cpu")
 
@@ -91,10 +83,6 @@ class Wrapper(nn.Module):
         correct_count = int((rst == ground_truth).sum().item())
 
         return correct_count/float(ground_truth.shape[0])*100
-
-    def early_stop(self, loss):
-        self.scheduler.step(loss)
-        return (self.optimizer.param_groups[0]["lr"] < self.stopping_rate)
 
     def run(self, dataloader, mode="train"):
         if mode == "train":
@@ -123,23 +111,7 @@ class Wrapper(nn.Module):
 
 
 if __name__ == "__main__":
-    try:
-        with open("model.pth", mode="rb") as f:
-            while True:
-                ans = input("Load previous model ? [y/N]")
-                if ans == "y":
-                    Classifier = pickle.load(f)
-                    print("Model restored")
-                    break
-                elif ans == "N" or ans == "":
-                    Classifier = Wrapper()
-                    print("New model created")
-                    break
-                else:
-                    pass
-    except:
-        print("No model found, creating new model")
-        Classifier = Wrapper()
+    Classifier = Wrapper()
     train_loader, valid_loader, test_loader = myDataLoader.myDataLoader()
 
     print("Start Training")
@@ -155,13 +127,6 @@ if __name__ == "__main__":
 
         print("Epoch %d: train acc: %.2f, valid acc: %.2f, test acc: %.2f" %
               (epoch, acc_train, acc_valid, acc_test))
-
-        with open("model.pth", mode="wb") as f:
-            pickle.dump(Classifier, f)
-        print("Model saved")
-
-        if Classifier.early_stop(loss_valid):
-            break
 
     print("Training finished!")
     print("Test Accuracy: %.2f" % (acc_test))

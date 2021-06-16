@@ -18,7 +18,6 @@ class Hyper_parameters():
         self.batch_size = 64
         self.num_epochs = 26
         self.learning_rate = 1e-2
-        self.stopping_rate = 1e-5
         self.weight_decay = 1e-6
         self.momentum = 0.9
         self.factor = 0.2
