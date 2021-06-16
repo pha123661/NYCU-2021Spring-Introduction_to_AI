@@ -62,7 +62,6 @@ class CNN_Model(nn.Module):
 
     def forward(self, x):
         x = torch.unsqueeze(x, dim=1)
-        print(x.shape)
         features = self.extractor(x)
         features = features.reshape((features.shape[0], -1))
         ret = self.classifier(features)
