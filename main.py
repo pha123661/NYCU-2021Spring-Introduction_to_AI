@@ -14,30 +14,40 @@ np.random.seed(0)
 class CNN_Model(nn.Module):
     def __init__(self):
         super().__init__()
+
         self.extractor = nn.Sequential(
+            # 1 128 128
             nn.Conv2d(in_channels=1, out_channels=64,
                       kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
+            # 64 128 128
             nn.MaxPool2d(kernel_size=2),
+            # 64 64 64
 
             nn.Conv2d(in_channels=64, out_channels=128,
                       kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(128),
             nn.ReLU(),
+            # 128 64 64
             nn.MaxPool2d(kernel_size=2),
+            # 128 32 32
 
             nn.Conv2d(in_channels=128, out_channels=256,
                       kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(256),
             nn.ReLU(),
+            # 256 32 32
             nn.MaxPool2d(kernel_size=4),
+            # 256 8 8
 
             nn.Conv2d(in_channels=256, out_channels=512,
                       kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(512),
             nn.ReLU(),
+            # 512 8 8
             nn.MaxPool2d(kernel_size=4)
+            # 512 2 2
         )
 
         self.classifier = nn.Sequential(
@@ -52,6 +62,7 @@ class CNN_Model(nn.Module):
 
     def forward(self, x):
         x = torch.unsqueeze(x, dim=1)
+        print(x.shape)
         features = self.extractor(x)
         features = features.reshape((features.shape[0], -1))
         ret = self.classifier(features)
