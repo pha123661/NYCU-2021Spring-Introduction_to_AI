@@ -1,17 +1,16 @@
-from Hyper_parameters import HyperParams
-from main import *
-from pytube import YouTube
-import pickle
-import urllib
-import numpy as np
-import librosa
-import os
-
 import warnings
+import os
+import librosa
+import numpy as np
+import urllib
+from pytube import YouTube
+from main import *
+from Hyper_parameters import HyperParams
+
 warnings.filterwarnings("ignore")
 
 
-def feature_extraction(filename):
+def feature_extraction(filename, debug=False):
     def melspectrogram():
         y, sr = librosa.load(filename, HyperParams.sample_rate)
         S = librosa.stft(y, n_fft=HyperParams.fft_size,
@@ -34,30 +33,32 @@ def feature_extraction(filename):
         return resize_array
 
     feature = melspectrogram()
-    feature = resize_array(feature, HyperParams.feature_length)
+    if debug:
+        feature = resize_array(feature, HyperParams.feature_length)
     num_chunks = feature.shape[0]/HyperParams.num_mels
     return np.split(feature, num_chunks)
 
 
 if __name__ == '__main__':
-    print("Loading model...")
     Model = torch.load("Trained_model_wonorm.pth",
                        map_location=torch.device('cpu'))
-    # link = input("Please enter YouTube link: ")
-    # yt = YouTube(link)
-    # while True:
-    #     try:
-    #         name = yt.streams.filter(only_audio=True).first().download()
-    #         break
-    #     except urllib.error.HTTPError:
-    #         print("Timeout, retry download")
-    # print("Finish downloading", name.split("\\")[-1])
-    name = os.path.join(
-        r"C:\Users\pha123661\Desktop\NYCU-2021Spring-Introduction_to_AI\dataset\gtzan\metal", "metal.00008.wav")
+    link = input("Please enter YouTube link: ")
+    yt = YouTube(link)
+    while True:
+        try:
+            name = yt.streams.filter(only_audio=True).first().download()
+            break
+        except urllib.error.HTTPError:
+            print("Timeout, restarting download")
+    print('Finish downloading: "'+name.split("\\")[-1], '"')
     data_chuncks = feature_extraction(name)
     data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
+    if not len(data_chuncks):
+        data_chuncks = feature_extraction(name, debug=True)
+        data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
+    os.unlink(name)
     rst = Model(torch.Tensor(data_chuncks)).detach().numpy()
-    print(rst)
-    print(np.bincount(np.argmax(rst, axis=1)))
     rst = np.argmax(np.bincount(np.argmax(rst, axis=1)))
-    print(HyperParams.genres[rst])
+    print("*******************************")
+    print("AI thinks it's a " + HyperParams.genres[rst], "music")
+    print("*******************************")
