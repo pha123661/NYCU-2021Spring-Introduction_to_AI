@@ -3,8 +3,9 @@ import os
 import librosa
 import numpy as np
 import urllib
+import torch
 from pytube import YouTube
-from main import *
+from main import CNN_Model
 from Hyper_parameters import HyperParams
 
 warnings.filterwarnings("ignore")
