@@ -53,7 +53,7 @@ if __name__ == '__main__':
     #         print("Timeout, retry download")
     # print("Finish downloading", name.split("\\")[-1])
     name = os.path.join(
-        r"C:\Users\pha123661\Desktop\NYCU-2021Spring-Introduction_to_AI\dataset\gtzan\disco", "disco.00008.wav")
+        r"C:\Users\pha123661\Desktop\NYCU-2021Spring-Introduction_to_AI\dataset\gtzan\metal", "metal.00008.wav")
     data_chuncks = feature_extraction(name)
     data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
     rst = Model(torch.Tensor(data_chuncks)).detach().numpy()
