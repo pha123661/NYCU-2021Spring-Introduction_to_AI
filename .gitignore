@@ -2,3 +2,5 @@ __pycache__
 *.wav
 *.npy
 *.zip
+*.mp4
+tmp.py
