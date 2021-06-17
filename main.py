@@ -32,8 +32,7 @@ class CNN_Model(nn.Module):
         )
 
     def forward(self, x):
-        x = torch.reshape(x, (64, -1))
-        print(x.shape)
+        x = torch.reshape(x, (x.shape[0], -1))
         ret = self.classifier(x)
         return ret
 
