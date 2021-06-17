@@ -32,3 +32,5 @@ Train and test on GTZAN dataset.
 ### Use trained model to classify youtube video:
 1. Make sure you have "Trained_model_wonorm.pth" under the same directory.
 2. Run "$ python Demo-classify-youtube.py"
+
+**Note:** YouTube tends to block python crawler, if the process stucks, please enter ^C and restart the program.
