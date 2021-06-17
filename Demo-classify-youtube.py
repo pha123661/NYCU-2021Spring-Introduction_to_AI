@@ -4,6 +4,7 @@ import librosa
 import numpy as np
 import urllib
 import torch
+from moviepy.editor import AudioFileClip
 from pytube import YouTube
 from main import CNN_Model
 from Hyper_parameters import HyperParams
@@ -48,18 +49,23 @@ if __name__ == '__main__':
     while True:
         try:
             name = yt.streams.filter(only_audio=True).first().download()
+            wav_name = name.split(".")[0]+".wav"
             break
         except urllib.error.HTTPError:
             print("Timeout, restarting download")
     print('Finish downloading: "'+name.split("\\")[-1], '"')
-    data_chuncks = feature_extraction(name)
+    print("Converting and feature extracting...")
+    my_audio_clip = AudioFileClip(name)
+    my_audio_clip.write_audiofile(wav_name, logger=None)
+    data_chuncks = feature_extraction(wav_name)
     data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
     if not len(data_chuncks):
         data_chuncks = feature_extraction(name, debug=True)
         data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
     os.unlink(name)
+    os.unlink(wav_name)
     rst = Model(torch.Tensor(data_chuncks)).detach().numpy()
     rst = np.argmax(np.bincount(np.argmax(rst, axis=1)))
-    print("*******************************")
+    print("********************************")
     print("AI thinks it's a " + HyperParams.genres[rst], "music")
-    print("*******************************")
+    print("********************************")
