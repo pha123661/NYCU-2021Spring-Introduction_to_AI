@@ -20,8 +20,6 @@ class Hyper_parameters():
         self.learning_rate = 1e-2
         self.weight_decay = 1e-6
         self.momentum = 0.9
-        self.factor = 0.2
-        self.patience = 5
 
 
 HyperParams = Hyper_parameters()
