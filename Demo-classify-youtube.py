@@ -41,7 +41,7 @@ def feature_extraction(filename, debug=False):
 
 if __name__ == '__main__':
     Model = torch.load("Trained_model_wonorm.pth",
-                       map_location=torch.device('cpu'))
+                       map_location=torch.device('cpu')).eval()
     link = input("Please enter YouTube link: ")
     yt = YouTube(link)
     while True:
