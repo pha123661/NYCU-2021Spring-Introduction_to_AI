@@ -60,7 +60,7 @@ if __name__ == '__main__':
     data_chuncks = feature_extraction(wav_name)
     data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
     if not len(data_chuncks):
-        data_chuncks = feature_extraction(name, debug=True)
+        data_chuncks = feature_extraction(wav_name, debug=True)
         data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
     os.unlink(name)
     os.unlink(wav_name)
