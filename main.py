@@ -14,14 +14,37 @@ np.random.seed(0)
 class CNN_Model(nn.Module):
     def __init__(self):
         super().__init__()
+        self.extractor_RNN = nn.GRU(
+            input_size=128,
+            hidden_size=128,
+            batch_first=True,
+        )
+        self.extractor_CNN = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=64,
+                      kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
 
+            nn.Conv2d(in_channels=64, out_channels=128,
+                      kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2),
+
+            nn.Conv2d(in_channels=128, out_channels=256,
+                      kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=4),
+
+            nn.Conv2d(in_channels=256, out_channels=512,
+                      kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=4)
+        )
         self.classifier = nn.Sequential(
-            nn.Linear(in_features=16384, out_features=4096),
-            nn.ReLU(),
-            nn.Dropout(),
-            nn.Linear(in_features=4096, out_features=2048),
-            nn.ReLU(),
-            nn.Dropout(),
             nn.Linear(in_features=2048, out_features=1024),
             nn.ReLU(),
             nn.Dropout(),
@@ -32,6 +55,9 @@ class CNN_Model(nn.Module):
         )
 
     def forward(self, x):
+        x, h = self.extractor_RNN(x)
+        x = torch.unsqueeze(x, 1)
+        x = self.extractor_CNN(x)
         x = torch.reshape(x, (x.shape[0], -1))
         ret = self.classifier(x)
         return ret
