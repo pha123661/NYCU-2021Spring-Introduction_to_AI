@@ -142,4 +142,5 @@ if __name__ == "__main__":
     plt.legend(labels=["train", "valid", "test"])
     plt.xlabel("epoch")
     plt.ylabel("Accuracy")
+    plt.ylim(50, 100)
     plt.show()
