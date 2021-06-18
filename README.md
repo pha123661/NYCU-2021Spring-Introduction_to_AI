@@ -4,7 +4,19 @@ NYCU 2021 Spring Introduction to Artificial Intelligence Final project
 # Requirements:
 Python packages that you need.
 
-See requirements.txt
+numpy==1.19.5
+
+pytube==10.8.2
+
+matplotlib==3.3.4
+
+SoundFile==0.10.3.post1
+
+librosa==0.8.0
+
+moviepy==1.0.3
+
+torch==1.8.0+cu111
 
 # File description
 ### Demo-classify-youtube.py: 
