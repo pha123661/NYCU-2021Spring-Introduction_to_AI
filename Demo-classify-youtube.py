@@ -55,7 +55,7 @@ if __name__ == '__main__':
             except urllib.error.HTTPError:
                 print("Timeout, restarting download")
         print('Finish downloading: "'+name.split("\\")[-1]+'"')
-        print("Converting and feature extracting...")
+        print("Generating Mel spectrogram...")
         my_audio_clip = AudioFileClip(name)
         my_audio_clip.write_audiofile(wav_name, logger=None)
         data_chuncks = feature_extraction(wav_name)
