@@ -54,7 +54,7 @@ if __name__ == '__main__':
                 break
             except urllib.error.HTTPError:
                 print("Timeout, restarting download")
-        print('Finish downloading: "'+name.split("\\")[-1], '"')
+        print('Finish downloading: "'+name.split("\\")[-1]+'"')
         print("Converting and feature extracting...")
         my_audio_clip = AudioFileClip(name)
         my_audio_clip.write_audiofile(wav_name, logger=None)
