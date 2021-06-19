@@ -42,6 +42,7 @@ def feature_extraction(filename, debug=False):
 
 
 if __name__ == '__main__':
+    print("Available genres:", HyperParams.genres)
     Model = torch.load("Trained_model_wonorm.pth",
                        map_location=torch.device('cpu')).eval()
     while True:
