@@ -44,28 +44,31 @@ def feature_extraction(filename, debug=False):
 if __name__ == '__main__':
     Model = torch.load("Trained_model_wonorm.pth",
                        map_location=torch.device('cpu')).eval()
-    link = input("Please enter YouTube link: ")
-    yt = YouTube(link)
     while True:
-        try:
-            name = yt.streams.filter(only_audio=True).first().download()
-            wav_name = name.split(".")[0]+".wav"
-            break
-        except urllib.error.HTTPError:
-            print("Timeout, restarting download")
-    print('Finish downloading: "'+name.split("\\")[-1], '"')
-    print("Converting and feature extracting...")
-    my_audio_clip = AudioFileClip(name)
-    my_audio_clip.write_audiofile(wav_name, logger=None)
-    data_chuncks = feature_extraction(wav_name)
-    data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
-    if not len(data_chuncks):
-        data_chuncks = feature_extraction(wav_name, debug=True)
+        link = input("Please enter YouTube link: ")
+        yt = YouTube(link)
+        while True:
+            try:
+                name = yt.streams.filter(only_audio=True).first().download()
+                wav_name = name.split(".")[0]+".wav"
+                break
+            except urllib.error.HTTPError:
+                print("Timeout, restarting download")
+        print('Finish downloading: "'+name.split("\\")[-1], '"')
+        print("Converting and feature extracting...")
+        my_audio_clip = AudioFileClip(name)
+        my_audio_clip.write_audiofile(wav_name, logger=None)
+        data_chuncks = feature_extraction(wav_name)
         data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
-    os.unlink(name)
-    os.unlink(wav_name)
-    rst = Model(torch.Tensor(data_chuncks)).detach().numpy()
-    rst = np.argmax(np.bincount(np.argmax(rst, axis=1)))
-    print("********************************")
-    print("AI thinks it's a " + HyperParams.genres[rst], "music")
-    print("********************************")
+        if not len(data_chuncks):
+            data_chuncks = feature_extraction(wav_name, debug=True)
+            data_chuncks = [d for d in data_chuncks if d.shape == (128, 128)]
+        os.unlink(name)
+        os.unlink(wav_name)
+        rst = Model(torch.Tensor(data_chuncks)).detach().numpy()
+        rst = np.argmax(np.bincount(np.argmax(rst, axis=1)))
+        print("********************************")
+        print("AI thinks it's a " + HyperParams.genres[rst], "music")
+        print("********************************")
+        if input("Try another song? [Y/n]: ") in ["n", "N", "No", "no"]:
+            break
